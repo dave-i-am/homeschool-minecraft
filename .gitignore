@@ -1,4 +1,5 @@
 .env
 data
-shared-config/ops.json
-shared-config/whitelist.json
+backups
+backup.sh
+shared-config
