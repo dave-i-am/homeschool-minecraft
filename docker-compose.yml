@@ -1,0 +1,82 @@
+services:
+  minecraft-survival:
+    image: itzg/minecraft-server
+    ports:
+      - ${SURVIVAL_GAME_PORT}:25565
+      - ${SURVIVAL_RCON_PORT}:25575
+    volumes:
+      - ./data/survival:/data
+      - ./shared-config/whitelist.json:/data/whitelist.json
+      - ./shared-config/ops.json:/data/ops.json
+    environment:
+      EULA: "TRUE"
+      TYPE: "PAPER"
+      ENABLE_ROLLING_LOGS: "true"
+      MEMORY: "2G"
+      TZ: "Pacific/Auckland"
+      VERSION: ${SURVIVAL_VERSION}
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      MODRINTH_PROJECTS: |
+        advancedteleport
+        discordsrv
+        griefprevention:ue7jAjJ5
+        luckperms
+        vaultunlocked
+        worldedit
+        worldguard
+    restart: unless-stopped
+
+  backups-survival:
+    image: itzg/mc-backup
+    environment:
+      BACKUP_INTERVAL: ${BACKUP_INTERVAL}
+      RCON_HOST: minecraft-survival
+      PRUNE_BACKUPS_DAYS: ${PRUNE_BACKUPS_DAYS}
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      TZ: Pacific/Auckland
+    volumes:
+      - ./data/survival:/data:ro
+      - ./backups/survival:/backups
+    mem_limit: 3g
+    cpus: 1
+
+  minecraft-creative:
+    image: itzg/minecraft-server
+    ports:
+      - "25566:25565"
+      - "25576:25575"
+    volumes:
+      - ./data/creative:/data
+      - ./shared-config/whitelist.json:/data/whitelist.json
+      - ./shared-config/ops.json:/data/ops.json
+    environment:
+      EULA: "TRUE"
+      TYPE: "PAPER"
+      ENABLE_ROLLING_LOGS: "true"
+      MEMORY: "2G"
+      TZ: "Pacific/Auckland"
+      VERSION: ${CREATIVE_VERSION}
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      MODRINTH_PROJECTS: |
+        advancedteleport
+        discordsrv
+        griefprevention:ue7jAjJ5
+        luckperms
+        vaultunlocked
+        worldedit
+        worldguard
+    restart: unless-stopped
+
+  backups-creative:
+    image: itzg/mc-backup
+    environment:
+      BACKUP_INTERVAL: ${BACKUP_INTERVAL}
+      RCON_HOST: minecraft-creative
+      PRUNE_BACKUPS_DAYS: ${PRUNE_BACKUPS_DAYS}
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      TZ: Pacific/Auckland
+    volumes:
+      - ./data/creative:/data:ro
+      - ./backups/creative:/backups
+    mem_limit: 2g
+    cpus: 1
