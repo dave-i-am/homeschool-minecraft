@@ -1,0 +1,4 @@
+.env
+data
+shared-config/ops.json
+shared-config/whitelist.json
