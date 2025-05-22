@@ -17,11 +17,14 @@ services:
       VERSION: ${SURVIVAL_VERSION}
       RCON_PASSWORD: ${RCON_PASSWORD}
       MODRINTH_PROJECTS: |
+        advancedsensitivewords:Eh9FhiuS
         advancedteleport
         discordsrv
         griefprevention:ue7jAjJ5
         luckperms
+        smoderation
         vaultunlocked
+        viaversion
         worldedit
         worldguard
     restart: unless-stopped
@@ -58,11 +61,14 @@ services:
       VERSION: ${CREATIVE_VERSION}
       RCON_PASSWORD: ${RCON_PASSWORD}
       MODRINTH_PROJECTS: |
+        advancedsensitivewords:Eh9FhiuS
         advancedteleport
         discordsrv
         griefprevention:ue7jAjJ5
         luckperms
+        smoderation
         vaultunlocked
+        viaversion
         worldedit
         worldguard
     restart: unless-stopped
