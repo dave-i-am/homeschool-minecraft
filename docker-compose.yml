@@ -35,8 +35,9 @@ services:
     build: ./alerts
     environment:
       ALERTS_WEBHOOK: ${ALERTS_WEBHOOK}
+      ALERTS_FILE: ${ALERTS_FILE}
     volumes:
-      - ${SURVIVAL_ALERTS_FILE}:/alerts.txt:ro
+      - ./data/survival:/data:ro
     depends_on:
       - minecraft-survival
     restart: unless-stopped
@@ -91,8 +92,9 @@ services:
     build: ./alerts
     environment:
       ALERTS_WEBHOOK: ${ALERTS_WEBHOOK}
+      ALERTS_FILE: ${ALERTS_FILE}
     volumes:
-      - ${CREATIVE_ALERTS_FILE}:/alerts.txt:ro
+      - ./data/creative:/data:ro
     depends_on:
       - minecraft-creative
     restart: unless-stopped

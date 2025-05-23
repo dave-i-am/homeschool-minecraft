@@ -3,7 +3,7 @@
 # This script monitors a log file for new lines and sends them to a Discord channel via a webhook.
 
 WEBHOOK="${ALERTS_WEBHOOK:?Environment variable ALERTS_WEBHOOK not set}"
-FILE=/alerts.txt
+FILE="${ALERTS_FILE:?Environment variable ALERTS_FILE not set}"
 
 # Check if the monitored file exists
 if [ ! -f "$FILE" ]; then
