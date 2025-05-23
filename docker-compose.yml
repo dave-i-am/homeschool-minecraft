@@ -22,6 +22,8 @@ services:
         discordsrv
         griefprevention:ue7jAjJ5
         luckperms
+        multiverse-core
+        multiverse-portals
         smoderation
         vaultunlocked
         viaversion
@@ -76,6 +78,8 @@ services:
         discordsrv
         griefprevention:ue7jAjJ5
         luckperms
+        multiverse-core
+        multiverse-portals
         smoderation
         vaultunlocked
         viaversion
