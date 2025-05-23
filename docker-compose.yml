@@ -29,6 +29,16 @@ services:
         worldguard
     restart: unless-stopped
 
+  alerts-survival:
+    build: ./alerts
+    environment:
+      ALERTS_WEBHOOK: ${ALERTS_WEBHOOK}
+    volumes:
+      - ${SURVIVAL_ALERTS_FILE}:/alerts.txt:ro
+    depends_on:
+      - minecraft-survival
+    restart: unless-stopped
+
   backups-survival:
     image: itzg/mc-backup
     environment:
@@ -71,6 +81,16 @@ services:
         viaversion
         worldedit
         worldguard
+    restart: unless-stopped
+
+  alerts-creative:
+    build: ./alerts
+    environment:
+      ALERTS_WEBHOOK: ${ALERTS_WEBHOOK}
+    volumes:
+      - ${CREATIVE_ALERTS_FILE}:/alerts.txt:ro
+    depends_on:
+      - minecraft-creative
     restart: unless-stopped
 
   backups-creative:
