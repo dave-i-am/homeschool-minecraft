@@ -21,7 +21,6 @@ services:
         advancedteleport
         discordsrv
         griefprevention:ue7jAjJ5
-        head-drop
         luckperms
         multiverse-core:4.3.16
         multiverse-portals:4.2.3
@@ -79,7 +78,6 @@ services:
         advancedteleport
         discordsrv
         griefprevention:ue7jAjJ5
-        head-drop
         luckperms
         multiverse-core:4.3.16
         multiverse-portals:4.2.3
