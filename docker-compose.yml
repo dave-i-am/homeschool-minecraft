@@ -112,3 +112,16 @@ services:
       - ./backups/creative:/backups
     mem_limit: 2g
     cpus: 1
+
+  pvp-reset:
+    build: ./world-reset
+    environment:
+      RCON_HOST: minecraft-survival
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      WORLD_TO_RESET: pvp
+      RESET_INTERVAL_SECONDS: 300
+    volumes:
+      - ./data/survival:/data
+    depends_on:
+      - minecraft-survival
+    restart: unless-stopped
