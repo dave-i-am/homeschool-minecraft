@@ -25,7 +25,7 @@ worldExistsOnDisk() {
 
 initializeTemplate() {
   echo "Creating initial template copy of $WORLD_TO_RESET..."
-  cp -r "/data/$WORLD_TO_RESET" "/data/$WORLD_TO_RESET.template" || {
+  cp -a "/data/$WORLD_TO_RESET" "/data/$WORLD_TO_RESET.template" || {
     echo "Error: Failed to create template copy."
     exit 1
   }
@@ -84,7 +84,7 @@ resetFromTemplate() {
   }
 
   echo "Copying template files..."
-  cp -r "/data/$WORLD_TO_RESET.template" "/data/$WORLD_TO_RESET" || {
+  cp -a "/data/$WORLD_TO_RESET.template" "/data/$WORLD_TO_RESET" || {
     echo "Error: Failed to copy template files."
     return 1
   }
