@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Static analysis — shell scripts
+  # -------------------------------------------------------------------------
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: shellcheck backup.sh alerts/alerts.sh world-reset/world-reset.sh
+
+  # -------------------------------------------------------------------------
+  # Static analysis — Dockerfiles
+  # -------------------------------------------------------------------------
+  hadolint:
+    name: Hadolint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: hadolint alerts/Dockerfile
+      - run: hadolint world-reset/Dockerfile
+
+  # -------------------------------------------------------------------------
+  # docker-compose config validation
+  # -------------------------------------------------------------------------
+  compose-validate:
+    name: Validate docker-compose.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create stub .env so compose config can parse variables
+        run: |
+          cat > .env <<'EOF'
+          SURVIVAL_GAME_PORT=25565
+          SURVIVAL_RCON_PORT=25575
+          SURVIVAL_VERSION=1.21
+          SURVIVAL_RCON_CMDS_ON_CONNECT=
+          CREATIVE_VERSION=1.21
+          CREATIVE_RCON_CMDS_ON_CONNECT=
+          RCON_PASSWORD=test
+          ALERTS_WEBHOOK=https://example.com/webhook
+          ALERTS_FILE=/data/logs/latest.log
+          EOF
+      - name: Validate compose file
+        run: docker compose config --quiet
+
+  # -------------------------------------------------------------------------
+  # BATS unit tests
+  # -------------------------------------------------------------------------
+  bats:
+    name: BATS unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: bats --tap tests/
+
+  # -------------------------------------------------------------------------
+  # Docker image builds
+  # -------------------------------------------------------------------------
+  docker-build:
+    name: Docker builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build alerts image
+        run: docker build ./alerts
+      - name: Build world-reset image
+        run: docker build ./world-reset
+
+  # -------------------------------------------------------------------------
+  # Integration tests — start real servers (full production plugin set) via
+  # docker-compose.test.yml, then test via RCON.
+  # First run: ~5 min Modrinth downloads + ~3 min Paper startup = ~8-10 min.
+  # -------------------------------------------------------------------------
+  integration-test:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Install netcat (system package, not managed by mise)
+        run: sudo apt-get install -y --no-install-recommends netcat-openbsd
+
+      - name: Run integration tests
+        run: tests/integration/run.sh
+
+      - name: Dump server logs on failure
+        if: failure()
+        run: |
+          docker compose -f docker-compose.test.yml --project-name mc-integration logs --tail 100 || true

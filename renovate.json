@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Pacific/Auckland",
+  "schedule": ["before 6am on Monday"],
+  "labels": ["dependencies"],
+  "managers": [
+    {
+      "managerFilePatterns": ["/docker-compose\\.yml$/", "/docker-compose\\.test\\.yml$/"],
+      "manager": "docker-compose"
+    },
+    {
+      "managerFilePatterns": ["/(^|/)alerts/Dockerfile$/", "/(^|/)world-reset/Dockerfile$/"],
+      "manager": "dockerfile"
+    },
+    {
+      "manager": "github-actions"
+    },
+    {
+      "manager": "mise"
+    }
+  ]
+}
