@@ -1,9 +1,7 @@
-FROM alpine:latest
+FROM alpine:3.23
 
-RUN apk add --no-cache bash curl
+RUN apk add --no-cache bash=5.3.3-r1 curl=8.17.0-r1
 
-COPY alerts.sh /alerts.sh
-
-RUN chmod +x /alerts.sh
+COPY --chmod=755 alerts.sh /alerts.sh
 
 CMD ["/alerts.sh"]
