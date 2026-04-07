@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# DATA_DIR can be overridden in tests; defaults to the container's data volume
+DATA_DIR="${DATA_DIR:-/data}"
+
 if [ -z "$WORLD_TO_RESET" ]; then
   echo "Error: Environment variable WORLD_TO_RESET not set."
   exit 1
@@ -15,17 +18,21 @@ rcon() {
 }
 
 worldExistsInMultiverse() {
-  rcon "mv list" | grep -q "$1 " && return 0 \
-    || { echo "World $1 does not exist in MultiVerse."; return 1; }
+  if rcon "mv list" | grep -q "$1 "; then
+    return 0
+  else
+    echo "World $1 does not exist in MultiVerse."
+    return 1
+  fi
 }
 
 worldExistsOnDisk() {
-  [ -d "/data/$1" ]
+  [ -d "$DATA_DIR/$1" ]
 }
 
 initializeTemplate() {
   echo "Creating initial template copy of $WORLD_TO_RESET..."
-  cp -a "/data/$WORLD_TO_RESET" "/data/$WORLD_TO_RESET.template" || {
+  cp -a "$DATA_DIR/$WORLD_TO_RESET" "$DATA_DIR/$WORLD_TO_RESET.template" || {
     echo "Error: Failed to create template copy."
     exit 1
   }
@@ -78,13 +85,13 @@ resetFromTemplate() {
     echo "Error: Failed to unload world."
     return 1
   }
-  rm -rf "/data/$WORLD_TO_RESET" || {
+  rm -rf "${DATA_DIR:?}/$WORLD_TO_RESET" || {
     echo "Error: Failed to remove world directory."
     return 1
   }
 
   echo "Copying template files..."
-  cp -a "/data/$WORLD_TO_RESET.template" "/data/$WORLD_TO_RESET" || {
+  cp -a "$DATA_DIR/$WORLD_TO_RESET.template" "$DATA_DIR/$WORLD_TO_RESET" || {
     echo "Error: Failed to copy template files."
     return 1
   }
@@ -99,15 +106,19 @@ resetFromTemplate() {
   return 0
 }
 
-while true; do
-  echo "--- Checking world state ---"
+main() {
+  while true; do
+    echo "--- Checking world state ---"
 
-  if checkForOnlinePlayers; then
-    echo "Online players detected in $WORLD_TO_RESET. Skipping reset."
-  else
-    resetFromTemplate
-  fi
+    if checkForOnlinePlayers; then
+      echo "Online players detected in $WORLD_TO_RESET. Skipping reset."
+    else
+      resetFromTemplate
+    fi
 
-  echo "Sleeping for $RESET_INTERVAL_SECONDS seconds..."
-  sleep $RESET_INTERVAL_SECONDS
-done
+    echo "Sleeping for $RESET_INTERVAL_SECONDS seconds..."
+    sleep "$RESET_INTERVAL_SECONDS"
+  done
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then main "$@"; fi

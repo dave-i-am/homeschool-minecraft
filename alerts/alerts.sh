@@ -18,8 +18,9 @@ tail -n 0 -F "$FILE" | while read -r line; do
   [ -z "$line" ] && continue
 
   # Send to Discord via webhook
+  payload="{\"content\": \"${line//\"/\\\"}\"}"
   curl -s -H "Content-Type: application/json" \
        -X POST \
-       -d "{\"content\": \"$(echo "$line" | sed 's/"/\\"/g')\"}" \
+       -d "$payload" \
        "$WEBHOOK" > /dev/null
 done
