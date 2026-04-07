@@ -1,0 +1,15 @@
+# Dev tool versions managed by mise (https://mise.jdx.dev)
+# Run `mise install` to set up all tools.
+# Run `mise pin <tool>` to lock a specific version.
+#
+# System prerequisites (not manageable by mise):
+#   - Docker (https://docs.docker.com/get-docker/)
+#   - netcat  Ubuntu/Debian: sudo apt-get install netcat-openbsd
+#             macOS: included in base OS
+
+[tools]
+shellcheck = "0.11.0"
+hadolint   = "2.14.0"
+bats       = "1.13.0"
+# rcon-cli: downloaded as a pre-built binary from GitHub releases
+"github:itzg/rcon-cli" = "1.7.4"
