@@ -1,0 +1,96 @@
+# Integration-test compose — mirrors production as closely as possible.
+#
+# Key differences from docker-compose.yml (intentional):
+#   - ONLINE_MODE=false  (no Mojang auth available in CI)
+#   - Ports offset +100 to avoid conflicts with a running production stack
+#   - Named volumes are ephemeral (no persistent world data)
+#   - No restart policy
+#
+# Ports:
+#   survival : game 25665, RCON 25675
+#   creative : game 25666, RCON 25676
+#
+# Usage:
+#   docker compose -f docker-compose.test.yml --project-name mc-integration up -d
+
+services:
+  survival-test:
+    image: itzg/minecraft-server
+    ports:
+      - "25665:25565"
+      - "25675:25575"
+    volumes:
+      - survival-test-data:/data
+    environment:
+      EULA: "TRUE"
+      TYPE: "PAPER"
+      ENABLE_ROLLING_LOGS: "true"
+      MEMORY: "2G"
+      TZ: "Pacific/Auckland"
+      VERSION: "${TEST_MC_VERSION:-1.21.4}"
+      ONLINE_MODE: "false"
+      RCON_PASSWORD: "integration-test-rcon-pw"
+      # Exact production plugin list. DiscordSRV will fail to authenticate
+      # (no bot token) but will not crash the server.
+      MODRINTH_PROJECTS: |
+        advancedsensitivewords:Eh9FhiuS
+        advancedteleport
+        coreprotect
+        discordsrv
+        griefprevention:ue7jAjJ5
+        luckperms
+        multiverse-core:4.3.16
+        multiverse-portals:4.2.3
+        smoderation
+        vaultunlocked
+        viaversion
+        worldedit
+        worldguard
+    healthcheck:
+      test: ["CMD", "mc-health"]
+      # Plugins are downloaded on first run; allow up to 5 min before checking.
+      start_period: 5m
+      interval: 15s
+      retries: 16    # up to 4 extra minutes after start_period
+    restart: "no"
+
+  creative-test:
+    image: itzg/minecraft-server
+    ports:
+      - "25666:25565"
+      - "25676:25575"
+    volumes:
+      - creative-test-data:/data
+    environment:
+      EULA: "TRUE"
+      TYPE: "PAPER"
+      ENABLE_ROLLING_LOGS: "true"
+      MEMORY: "2G"
+      TZ: "Pacific/Auckland"
+      VERSION: "${TEST_MC_VERSION:-1.21.4}"
+      ONLINE_MODE: "false"
+      RCON_PASSWORD: "integration-test-rcon-pw"
+      MODRINTH_PROJECTS: |
+        advancedsensitivewords:Eh9FhiuS
+        advancedteleport
+        coreprotect
+        discordsrv
+        griefprevention:ue7jAjJ5
+        luckperms
+        multiverse-core:4.3.16
+        multiverse-portals:4.2.3
+        smoderation
+        vaultunlocked
+        viaversion
+        worldedit
+        worldguard
+    healthcheck:
+      test: ["CMD", "mc-health"]
+      start_period: 5m
+      interval: 15s
+      retries: 16
+    restart: "no"
+
+volumes:
+  survival-test-data:
+  creative-test-data:
