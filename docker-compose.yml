@@ -60,6 +60,7 @@ services:
       - nfs-backups:/backups
     mem_limit: 3g
     cpus: 1
+    stop_grace_period: 10m
     depends_on:
       - minecraft-survival
     restart: unless-stopped
@@ -125,6 +126,7 @@ services:
       - nfs-backups:/backups
     mem_limit: 2g
     cpus: 1
+    stop_grace_period: 10m
     depends_on:
       - minecraft-creative
     restart: unless-stopped
