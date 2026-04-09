@@ -29,13 +29,11 @@ CI runs all of the above on every push and pull request.
 ## Project layout
 
 ```
-backup.sh                   NFS backup script (runs on the host via cron)
 alerts/                     Docker image: tails server log → Discord webhook
 world-reset/                Docker image: periodically resets a Minecraft world
 shared-config/              whitelist.json + ops.json (gitignored — production data)
 data/                       Persistent server data volumes (gitignored)
 tests/
-  test_backup.bats          Unit tests for backup.sh
   test_world_reset.bats     Unit tests for world-reset/world-reset.sh
   integration/
     run.sh                  Brings up the test stack and runs integration tests
@@ -66,6 +64,6 @@ When a Renovate PR lands, re-pin any affected package versions in the Dockerfile
 
 ## Environment variables
 
-`backup.sh` and `world-reset/world-reset.sh` use environment variables with sensible defaults so they can be tested without a live server. See the comments at the top of each script.
+`world-reset/world-reset.sh` uses environment variables with sensible defaults so it can be tested without a live server. See the comments at the top of the script.
 
 The production stack is configured via a `.env` file (gitignored). Copy `.env.template` to `.env` and fill in values before running `docker compose up`.

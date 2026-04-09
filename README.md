@@ -10,8 +10,7 @@ Docker Compose stack running two Paper Minecraft servers (survival + creative) w
 | `minecraft-creative` | Paper creative server with matching plugin set |
 | `alerts-survival` / `alerts-creative` | Tails the server log and forwards new lines to a Discord webhook |
 | `pvp-reset` | Resets the `pvp` world on the survival server every 5 minutes (skips reset if players are present) |
-
-Backups are handled outside Docker by `backup.sh`, which rsyncs the `backups/` directory to an NFS share and is invoked via cron on the host.
+| `backups-creative` | `itzg/mc-backup` sidecar — takes restic snapshots of the creative server and stores them on NFS |
 
 ## Quick start
 
@@ -31,14 +30,18 @@ $EDITOR .env
 
 | Variable | Purpose |
 |---|---|
+| `TZ` | Timezone for all containers (e.g. `Pacific/Auckland`) |
 | `SURVIVAL_VERSION` / `CREATIVE_VERSION` | Minecraft version for each server |
 | `SURVIVAL_GAME_PORT` / `CREATIVE_GAME_PORT` | Host port exposed for game connections |
 | `SURVIVAL_RCON_PORT` / `CREATIVE_RCON_PORT` | Host port exposed for RCON |
 | `RCON_PASSWORD` | Shared RCON password |
 | `ALERTS_WEBHOOK` | Discord webhook URL for log alerts |
 | `ALERTS_FILE` | Absolute path to the log file to monitor |
-| `BACKUP_INTERVAL` | Backup cadence (e.g. `24h`) — used by the commented-out `mc-backup` services |
-| `PRUNE_BACKUPS_DAYS` | Days of backups to retain |
+| `BACKUP_INTERVAL` | How often to take a backup (e.g. `48h`) |
+| `NFS_SERVER_ADDRESS` | Hostname or IP of the NFS server |
+| `NFS_SHARE` | NFS export path (mounted as a Docker volume into the backup containers) |
+| `RESTIC_PASSWORD` | Encryption password for the restic repositories |
+| `PRUNE_RESTIC_RETENTION` | Restic forget flags controlling how many snapshots to keep (e.g. `--keep-daily 7 --keep-weekly 4 --keep-monthly 6`) |
 | `SURVIVAL_RCON_CMDS_ON_CONNECT` / `CREATIVE_RCON_CMDS_ON_CONNECT` | RCON commands to run on server startup |
 
 ### Start the stack
@@ -49,22 +52,27 @@ docker compose up -d
 
 ## Backups
 
-`backup.sh` mounts an NFS share and rsyncs `backups/` to it. Variables (all overridable via environment):
+Backups run inside Docker via `itzg/mc-backup` sidecars using [restic](https://restic.net/). Each backup container:
 
-| Variable | Default |
-|---|---|
-| `BACKUP_DIR` | `BACKUP_DIR_VALUE` |
-| `NFS_SERVER_ADDRESS` | `home` |
-| `NFS_SHARE` | `NFS_SHARE_VALUE` |
-| `MOUNT_DIR` | `MOUNT_DIR_VALUE` |
+1. Flushes the Minecraft server to disk via RCON
+2. Takes an incremental restic snapshot of the world data
+3. Prunes old snapshots according to `PRUNE_RESTIC_RETENTION`
 
-Add it to root's crontab:
+Snapshots are stored on an NFS share, mounted into the containers as the Docker named volume `nfs-backups` (NFSv3).
 
+### NFS setup
+
+The NFS export must use `no_root_squash,insecure` (Docker uses unprivileged ports). The directory on the NFS server must be owned by root so the `itzg/mc-backup` entrypoint keeps root privileges when writing restic metadata.
+
+```sh
+# On the NFS server
+sudo chown root:root /path/to/nfs/share
+# /etc/exports entry:
+/path/to/nfs/share  <client-cidr>(rw,no_subtree_check,no_root_squash,insecure)
+sudo exportfs -ra
 ```
-0 3 * * * /path/to/minecraft/backup.sh
-```
 
-The commented-out `backups-survival` / `backups-creative` services in `docker-compose.yml` offer an alternative in-Docker backup approach using `itzg/mc-backup`.
+> **Note:** `backups-survival` is currently commented out in `docker-compose.yml` due to disk space constraints. Uncomment it once space is available — the restic repo at `/backups/survival` will be initialised automatically on first run.
 
 ## Shared config
 

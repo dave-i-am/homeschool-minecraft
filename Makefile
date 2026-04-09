@@ -20,7 +20,7 @@ integration-test:
 # ---- ShellCheck ------------------------------------------------------------
 lint:
 	@command -v shellcheck >/dev/null 2>&1 || { echo "shellcheck not found. Run 'mise install'."; exit 1; }
-	shellcheck backup.sh alerts/alerts.sh world-reset/world-reset.sh
+	shellcheck alerts/alerts.sh world-reset/world-reset.sh
 
 # ---- Hadolint (local binary via mise) -------------------------------------
 lint-docker:
