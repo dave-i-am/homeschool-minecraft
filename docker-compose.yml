@@ -31,6 +31,7 @@ services:
         viaversion
         worldedit
         worldguard
+        worldprune
     restart: unless-stopped
 
   alerts-survival:
@@ -97,6 +98,7 @@ services:
         viaversion
         worldedit
         worldguard
+        worldprune
     restart: unless-stopped
 
   alerts-creative:
