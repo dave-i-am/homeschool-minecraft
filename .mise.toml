@@ -9,7 +9,7 @@
 
 [tools]
 shellcheck = "0.11.0"
-hadolint   = "2.14.0"
+hadolint   = "2.15.1"
 bats       = "1.13.0"
 # rcon-cli: downloaded as a pre-built binary from GitHub releases
 "github:itzg/rcon-cli" = "1.7.4"
